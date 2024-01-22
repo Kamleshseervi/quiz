@@ -1,10 +1,13 @@
+
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-
+import 'package:untitled/utils/colors.dart';
+import 'package:untitled/widgets/imagelist.dart';
 import 'list.dart';
 import 'notification_firebase.dart';
 
@@ -20,16 +23,17 @@ class _HomeScreenState extends State<HomeScreen> {
   int _selectedTab = 2;
 
   List _pages = [
-    Center(
-      child: Text("About"),
-    ),
+
     ProfileScreen(),
+    Center(
+      child: Text("Articles"),
+    ),
     PhotoList(),
     Center(
-      child: Text("Contact"),
+      child: Text("Database"),
     ),
     Center(
-      child: Text("Settings"),
+      child: Text("Statistics"),
     ),
   ];
 
@@ -77,36 +81,68 @@ class _HomeScreenState extends State<HomeScreen> {
       debugShowCheckedModeBanner: false,
       home: Scaffold(
         appBar: AppBar(
-          title: const Text('Quiz'),
-          backgroundColor: Colors.orange,
+        shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+        bottomLeft:  Radius.circular(20),
+        bottomRight:  Radius.circular(20),
+    ),),
+          leading: Icon(Icons.account_circle, color: Colors.white, size: 36,),
+          actions: [Icon(Icons.notifications_active, color:  Colors.yellow[700],),Text("     ")],
+          title: Container(
+
+            padding: EdgeInsets.fromLTRB(15, 0 , 15, 0),
+            child: Row(
+
+                children: [
+
+                  Icon(Icons.search),
+                  Text("|"),
+
+                  InputChip(label: Text("ExaQ"), backgroundColor: Colors.white, shape: LinearBorder.none, labelPadding: EdgeInsets.all(0),),
+                ],
+            ),
+            width:220,
+            height: 40,
+
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
+              color: Colors.white,
+
+            ),
+          ),
+          backgroundColor: AppColors.mainColor,
+          
         ),
-        body: _pages[_selectedTab],
+        body:  _pages[_selectedTab],
+
+
+
+
+
         bottomNavigationBar: BottomNavigationBar(
           type: BottomNavigationBarType.fixed,
           currentIndex: _selectedTab,
           onTap: (index) => _changeTab(index),
-          selectedItemColor: Colors.red,
+          selectedItemColor: AppColors.mainColor,
           unselectedItemColor: Colors.grey,
           items: [
-            BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
-            BottomNavigationBarItem(icon: Icon(Icons.person), label: "About"),
+            BottomNavigationBarItem(icon: Icon(Icons.account_circle), label: "About"),
+            BottomNavigationBarItem(icon: Icon(Icons.newspaper), label: "Articles"),
             BottomNavigationBarItem(
               label: "Home",
               icon: Container(
-                padding: EdgeInsets.fromLTRB(4, 8, 8, 8),
+                padding: EdgeInsets.all(15),
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: Colors.orange,
+                  color: AppColors.mainColor,
                 ),
-                child: FlutterLogo(
-                  size: 38.0,
-                ),
+                child: Image.asset('lib/assets/menu.png', width: 20, height: 20,),
               ),
             ),
             BottomNavigationBarItem(
-                icon: Icon(Icons.contact_mail), label: "Contact"),
+                icon: Icon(Icons.storage), label: "Database"),
             BottomNavigationBarItem(
-                icon: Icon(Icons.settings), label: "Settings"),
+                icon: Icon(Icons.stacked_bar_chart), label: "Statistics"),
           ],
         ),
       ),

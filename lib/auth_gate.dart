@@ -1,65 +1,99 @@
-import 'package:firebase_auth/firebase_auth.dart' hide EmailAuthProvider;
-import 'package:firebase_ui_auth/firebase_ui_auth.dart';
-import 'package:firebase_ui_oauth_google/firebase_ui_oauth_google.dart'; // new
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:untitled/HomeScreen.dart';
+import 'package:untitled/registration.dart';
 
-class AuthGate extends StatelessWidget {
-  const AuthGate({super.key});
+class LoginPage extends StatelessWidget {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final GoogleSignIn googleSignIn = GoogleSignIn();
+
+  Future<UserCredential> _signInWithGoogle() async {
+    try {
+      GoogleSignInAccount? googleSignInAccount = await googleSignIn.signIn();
+      GoogleSignInAuthentication googleSignInAuthentication =
+          await googleSignInAccount!.authentication;
+      AuthCredential credential = GoogleAuthProvider.credential(
+        accessToken: googleSignInAuthentication.accessToken,
+        idToken: googleSignInAuthentication.idToken,
+      );
+      return await _auth.signInWithCredential(credential);
+    } catch (error) {
+      print(error);
+      return Future.error(error.toString());
+    }
+  }
+
+  Future<Object> _signInWithEmailAndPassword(
+      String email, String password) async {
+    try {
+      return await _auth.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+    } catch (error) {
+      print(error);
+      return Future.error(error.toString());
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<User?>(
-      stream: FirebaseAuth.instance.authStateChanges(),
-      builder: (context, snapshot) {
-        if (!snapshot.hasData) {
-          return SignInScreen(
-            providers: [
-              EmailAuthProvider(),
-              GoogleProvider(
-                  clientId:
-                      "908090659730-vc65bocj3s67r2irgkou01fn4dd5kepk.apps.googleusercontent.com"), // new
-            ],
-            headerBuilder: (context, constraints, shrinkOffset) {
-              return Padding(
-                padding: const EdgeInsets.all(20),
-                child: AspectRatio(
-                  aspectRatio: 1,
-                  child: Image.asset('flutterfire_300x.png'),
-                ),
-              );
-            },
-            subtitleBuilder: (context, action) {
-              return Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8.0),
-                child: action == AuthAction.signIn
-                    ? const Text('Welcome to FlutterFire, please sign in!')
-                    : const Text('Welcome to Flutterfire, please sign up!'),
-              );
-            },
-            footerBuilder: (context, action) {
-              return const Padding(
-                padding: EdgeInsets.only(top: 16),
-                child: Text(
-                  'By signing in, you agree to our terms and conditions.',
-                  style: TextStyle(color: Colors.grey),
-                ),
-              );
-            },
-            sideBuilder: (context, shrinkOffset) {
-              return Padding(
-                padding: const EdgeInsets.all(20),
-                child: AspectRatio(
-                  aspectRatio: 1,
-                  child: Image.asset('flutterfire_300x.png'),
-                ),
-              );
-            },
-          );
-        }
-
-        return const HomeScreen();
-      },
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Login Screen'),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            TextField(
+              decoration: InputDecoration(labelText: 'Email'),
+            ),
+            SizedBox(height: 10),
+            TextField(
+              decoration: InputDecoration(labelText: 'Password'),
+              obscureText: true,
+            ),
+            SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () {
+                // Implement email/password login
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => HomeScreen(  )),
+                );
+              },
+              child: Text('Login'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                try {
+                  UserCredential userCredential = await _signInWithGoogle();
+                  print(
+                      'Signed in with Google: ${userCredential.user!.displayName}');
+                } catch (error) {
+                  print('Google Sign In Error: $error');
+                }
+              },
+              child: Text('SignIn withGoogle'),
+            ),
+            SizedBox(height: 10),
+            TextButton(
+              onPressed: () {
+                // Navigate to registration screen
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => SignupPage()),
+                );
+              },
+              child: Text('Create a new account'),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
